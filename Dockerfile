@@ -9,8 +9,8 @@ RUN go mod download
 # copy source code
 COPY . .
 
-# build binary
-RUN go build -o /bin/server ./cmd/server
+# build binary static (tidak butuh glibc)
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/server ./cmd/server
 
 # Stage 2: final image (lebih ringan)
 FROM alpine:3.20
