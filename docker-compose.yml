@@ -1,4 +1,31 @@
+# services:
+#   postgres:
+#     image: postgres:15
+#     container_name: narwastuconnect_pg
+#     restart: always
+#     environment:
+#       POSTGRES_USER: myuser
+#       POSTGRES_PASSWORD: mypassword
+#       POSTGRES_DB: mydb
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+# volumes:
+#   pgdata:
+
 services:
+  app:
+    build: .
+    container_name: narwastuconnect_app
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mydb?sslmode=disable
+    ports:
+      - "8080:8080" # expose API
+
   postgres:
     image: postgres:15
     container_name: narwastuconnect_pg
@@ -11,5 +38,6 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
 volumes:
   pgdata:
