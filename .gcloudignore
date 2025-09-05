@@ -1,0 +1,55 @@
+# .gcloudignore
+
+# This file specifies files that are *not* uploaded to Google Cloud
+
+# Default ignores
+.git/
+.gitignore
+.gcloudignore
+.DS_Store
+
+# Go build
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Coverage & test output
+*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Build / bin
+/bin/
+/build/
+
+# Dependency
+go.work
+go.work.sum
+vendor/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# Docker local overrides
+docker-compose.override.yml
+*.local.yml
+
+# Database temp
+*.db
+*.sql~
+
+# Editor/IDE
+.idea/
+.vscode/
+
+# System
+Thumbs.db
+*.tmp
+*.swp
