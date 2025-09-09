@@ -51,6 +51,31 @@ func (h *AuthHandler) GoogleCallback(c echo.Context) error {
 	})
 }
 
+// POST /auth/google/mobile
+func (h *AuthHandler) GoogleMobileLogin(c echo.Context) error {
+	var body struct {
+		IDToken string `json:"id_token"`
+	}
+	if err := c.Bind(&body); err != nil || body.IDToken == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id_token required"})
+	}
+
+	u, err := h.service.HandleGoogleIDToken(body.IDToken)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+	}
+
+	jwt, err := h.service.GenerateJWT(u)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "token error"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"token": jwt,
+		"user":  u,
+	})
+}
+
 // POST /auth/signout (stateless: client hapus token)
 func (h *AuthHandler) SignOut(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)

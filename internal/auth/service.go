@@ -86,3 +86,59 @@ func (s *AuthService) HandleGoogleCallback(code string) (*User, error) {
 	}
 	return u, nil
 }
+
+// HandleGoogleIDToken dipakai untuk login via Flutter (google_sign_in)
+func (s *AuthService) HandleGoogleIDToken(idToken string) (*User, error) {
+	// Verifikasi ID token via Google
+	resp, err := http.Get("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return nil, errors.New("invalid google id token")
+	}
+	defer resp.Body.Close()
+
+	var info struct {
+		Sub     string `json:"sub"` // Google user ID
+		Email   string `json:"email"`
+		Name    string `json:"name"`
+		Picture string `json:"picture"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
+		return nil, err
+	}
+	if info.Sub == "" {
+		return nil, errors.New("google user sub empty")
+	}
+
+	// Cari user berdasarkan provider_id
+	u, err := s.repo.FindByProvider(info.Sub, "google")
+	if err != nil || u == nil {
+		// User belum ada → buat baru
+		email := info.Email
+		name := info.Name
+		avatar := info.Picture
+		u = &User{
+			Provider:   "google",
+			ProviderID: info.Sub,
+			Email:      &email,
+			Name:       &name,
+			AvatarURL:  &avatar,
+		}
+		if err := s.repo.Create(u); err != nil {
+			return nil, err
+		}
+	} else {
+		// User sudah ada → update data terbaru
+		if info.Email != "" {
+			u.Email = &info.Email
+		}
+		if info.Name != "" {
+			u.Name = &info.Name
+		}
+		if info.Picture != "" {
+			u.AvatarURL = &info.Picture
+		}
+		_ = s.repo.Save(u)
+	}
+
+	return u, nil
+}

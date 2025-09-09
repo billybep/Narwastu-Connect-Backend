@@ -61,6 +61,7 @@ func main() {
 
 	e.GET("/verse/latest", verseH.GetLatestVerse)
 	e.POST("/verse", verseH.CreateVerse)
+	e.POST("/auth/google/mobile", h.GoogleMobileLogin)
 
 	// ========================
 	// 🔒 Protected Routes (/api/*)
