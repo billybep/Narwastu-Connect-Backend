@@ -17,6 +17,9 @@ FROM alpine:3.20
 
 WORKDIR /app
 
+# install CA certificates untuk HTTPS
+RUN apk add --no-cache ca-certificates
+
 # copy hasil build dari stage builder
 COPY --from=builder /bin/server /app/server
 
