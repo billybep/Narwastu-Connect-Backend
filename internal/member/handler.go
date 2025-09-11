@@ -23,7 +23,8 @@ func (h *Handler) GetWeeklyBirthdays(c echo.Context) error {
 	}
 
 	// mapping ke format frontend
-	var response []map[string]interface{}
+	// var response []map[string]interface{}
+	response := make([]map[string]interface{}, 0)
 	for _, m := range members {
 		response = append(response, map[string]interface{}{
 			"name":       m.FullName,

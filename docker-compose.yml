@@ -30,6 +30,8 @@ services:
     # ✅ bisa juga set env langsung untuk firebase
     environment:
       FIREBASE_SERVICE_ACCOUNT_JSON: "${FIREBASE_SERVICE_ACCOUNT_JSON}"
+    
+    # kalau local aktifkan
     # volumes:
     #   - ./config/firebase_service_account.json:/app/config/firebase_service_account.json:ro
 
