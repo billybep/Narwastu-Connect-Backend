@@ -104,11 +104,10 @@ func InitFirebase() {
 	var opt option.ClientOption
 
 	if jsonEnv := os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON"); jsonEnv != "" {
-		// Fix untuk \n literal (Railway/Vercel issue)
-		cleanJSON := strings.ReplaceAll(jsonEnv, `\n`, "\n")
+		// Buat JSON valid: hapus newline di tengah string
+		cleanJSON := strings.ReplaceAll(jsonEnv, "\n", "\\n")
 		opt = option.WithCredentialsJSON([]byte(cleanJSON))
 	} else {
-		// fallback ke file lokal
 		opt = option.WithCredentialsFile("config/firebase_service_account.json")
 	}
 
