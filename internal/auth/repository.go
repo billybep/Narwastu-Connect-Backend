@@ -21,3 +21,11 @@ func (r *UserRepository) Create(u *User) error {
 func (r *UserRepository) Save(u *User) error {
 	return repository.DB.Save(u).Error
 }
+
+func (r *UserRepository) FindByEmail(email string) (*User, error) {
+	var u User
+	if err := repository.DB.Where("email = ?", email).First(&u).Error; err != nil {
+		return nil, err
+	}
+	return &u, nil
+}

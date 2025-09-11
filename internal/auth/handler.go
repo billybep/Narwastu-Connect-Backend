@@ -51,16 +51,28 @@ func (h *AuthHandler) GoogleCallback(c echo.Context) error {
 	})
 }
 
-// POST /auth/google/mobile
-func (h *AuthHandler) GoogleMobileLogin(c echo.Context) error {
+// POST /auth/mobile
+func (h *AuthHandler) MobileLogin(c echo.Context) error {
 	var body struct {
-		IDToken string `json:"id_token"`
+		Provider string `json:"provider"` // "google" | "firebase"
+		IDToken  string `json:"id_token"`
 	}
-	if err := c.Bind(&body); err != nil || body.IDToken == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id_token required"})
+	if err := c.Bind(&body); err != nil || body.IDToken == "" || body.Provider == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "provider and id_token required"})
 	}
 
-	u, err := h.service.HandleGoogleIDToken(body.IDToken)
+	var u *User
+	var err error
+
+	switch body.Provider {
+	case "google":
+		u, err = h.service.HandleGoogleIDToken(body.IDToken)
+	case "firebase":
+		u, err = h.service.HandleFirebaseIDToken(body.IDToken)
+	default:
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "unsupported provider"})
+	}
+
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 	}

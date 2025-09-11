@@ -6,6 +6,8 @@ import (
 
 	"app/internal/auth"
 	"app/internal/common"
+	"app/internal/event"
+	"app/internal/member"
 	"app/internal/verse"
 	"app/pkg/repository"
 
@@ -19,13 +21,30 @@ func main() {
 	// Init DB
 	repository.InitDB()
 	if err := repository.DB.AutoMigrate(
+		// User Auth
 		&auth.User{},
+
+		// Verse of the day
 		&verse.Verse{},
 		&verse.Comment{},
 		&verse.VerseLike{},
+		&event.Event{},
+
+		// Data Jemaat
+		&member.Site{},
+		&member.Member{},
+		&member.FamilyRelationship{},
 	); err != nil {
 		log.Fatal(err)
 	}
+
+	// Init Firebase
+	auth.InitFirebase()
+
+	// Seeder
+	// if err := member.SeedMembers(repository.DB); err != nil {
+	// 	log.Fatal("Seeder error: ", err)
+	// }
 
 	// Init Echo
 	e := echo.New()
@@ -47,7 +66,8 @@ func main() {
 	// Auth routes
 	repo := auth.NewUserRepository()
 	googleCfg := auth.NewGoogleOAuthConfig()
-	svc := auth.NewAuthService(repo, googleCfg)
+	firebaseClient := auth.NewFirebaseAuth()
+	svc := auth.NewAuthService(repo, googleCfg, firebaseClient)
 	h := auth.NewAuthHandler(svc)
 
 	e.GET("/auth/google/login", h.GoogleLogin)
@@ -61,7 +81,7 @@ func main() {
 
 	e.GET("/verse/latest", verseH.GetLatestVerse)
 	e.POST("/verse", verseH.CreateVerse)
-	e.POST("/auth/google/mobile", h.GoogleMobileLogin)
+	e.POST("/auth/mobile", h.MobileLogin)
 
 	// ========================
 	// 🔒 Protected Routes (/api/*)
@@ -78,6 +98,20 @@ func main() {
 	api.POST("/verse/:id/like", verseH.LikeVerse)
 	api.POST("/verse/:id/share", verseH.ShareVerse)
 	api.POST("/verse/:id/comment", verseH.AddComment)
+
+	// Event routes
+	eventRepo := event.NewRepository(repository.DB)
+	eventSvc := event.NewService(eventRepo)
+	eventH := event.NewHandler(eventSvc)
+	eventH.RegisterRoutes(e, api)
+
+	// Member (Weekly Birthday)
+	memberRepo := member.NewRepository(repository.DB)
+	memberSvc := member.NewService(memberRepo)
+	memberH := member.NewHandler(memberSvc)
+
+	// Public routes
+	member.RegisterRoutes(e.Group(""), memberH)
 
 	// Start server
 	port := os.Getenv("PORT")

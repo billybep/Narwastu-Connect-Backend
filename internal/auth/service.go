@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,15 +10,86 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
+
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/auth"
+	"google.golang.org/api/option"
 )
 
 type AuthService struct {
-	repo   *UserRepository
-	config *oauth2.Config
+	repo         *UserRepository
+	config       *oauth2.Config
+	firebaseAuth *auth.Client
 }
 
-func NewAuthService(repo *UserRepository, cfg *oauth2.Config) *AuthService {
-	return &AuthService{repo: repo, config: cfg}
+func NewAuthService(repo *UserRepository, cfg *oauth2.Config, fb *auth.Client) *AuthService {
+	return &AuthService{repo: repo, config: cfg, firebaseAuth: fb}
+}
+
+// init firebase client sekali di main.go
+func NewFirebaseAuth() *auth.Client {
+	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_CREDENTIALS")) // serviceAccountKey.json
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		panic("failed to init firebase app: " + err.Error())
+	}
+	client, err := app.Auth(context.Background())
+	if err != nil {
+		panic("failed to init firebase auth: " + err.Error())
+	}
+	return client
+}
+
+// ---- method baru di AuthService ----
+func (s *AuthService) HandleFirebaseIDToken(idToken string) (*User, error) {
+	ctx := context.Background()
+
+	token, err := s.firebaseAuth.VerifyIDToken(ctx, idToken)
+	if err != nil {
+		return nil, errors.New("invalid firebase id token")
+	}
+
+	userRec, err := s.firebaseAuth.GetUser(ctx, token.UID)
+	if err != nil {
+		return nil, err
+	}
+
+	email := userRec.Email
+	name := userRec.DisplayName
+	avatar := userRec.PhotoURL
+
+	// 🔑 unify: cek berdasarkan email
+	var u *User
+	if email != "" {
+		u, _ = s.repo.FindByEmail(email)
+	}
+
+	if u == nil {
+		// buat user baru provider = google (unified)
+		u = &User{
+			Provider:   "google",
+			ProviderID: token.UID,
+			Email:      &email,
+			Name:       &name,
+			AvatarURL:  &avatar,
+		}
+		if err := s.repo.Create(u); err != nil {
+			return nil, err
+		}
+	} else {
+		// update data
+		u.Provider = "google"
+		u.ProviderID = token.UID
+		if name != "" {
+			u.Name = &name
+		}
+		if avatar != "" {
+			u.AvatarURL = &avatar
+		}
+		_ = s.repo.Save(u)
+	}
+
+	return u, nil
 }
 
 func (s *AuthService) GenerateJWT(u *User) (string, error) {
@@ -89,7 +161,6 @@ func (s *AuthService) HandleGoogleCallback(code string) (*User, error) {
 
 // HandleGoogleIDToken dipakai untuk login via Flutter (google_sign_in)
 func (s *AuthService) HandleGoogleIDToken(idToken string) (*User, error) {
-	// Verifikasi ID token via Google
 	resp, err := http.Get("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, errors.New("invalid google id token")
@@ -97,7 +168,7 @@ func (s *AuthService) HandleGoogleIDToken(idToken string) (*User, error) {
 	defer resp.Body.Close()
 
 	var info struct {
-		Sub     string `json:"sub"` // Google user ID
+		Sub     string `json:"sub"`
 		Email   string `json:"email"`
 		Name    string `json:"name"`
 		Picture string `json:"picture"`
@@ -109,28 +180,25 @@ func (s *AuthService) HandleGoogleIDToken(idToken string) (*User, error) {
 		return nil, errors.New("google user sub empty")
 	}
 
-	// Cari user berdasarkan provider_id
-	u, err := s.repo.FindByProvider(info.Sub, "google")
-	if err != nil || u == nil {
-		// User belum ada → buat baru
-		email := info.Email
-		name := info.Name
-		avatar := info.Picture
+	// 🔑 unify: cek by email dulu
+	var u *User
+	if info.Email != "" {
+		u, _ = s.repo.FindByEmail(info.Email)
+	}
+
+	if u == nil {
 		u = &User{
 			Provider:   "google",
 			ProviderID: info.Sub,
-			Email:      &email,
-			Name:       &name,
-			AvatarURL:  &avatar,
+			Email:      &info.Email,
+			Name:       &info.Name,
+			AvatarURL:  &info.Picture,
 		}
 		if err := s.repo.Create(u); err != nil {
 			return nil, err
 		}
 	} else {
-		// User sudah ada → update data terbaru
-		if info.Email != "" {
-			u.Email = &info.Email
-		}
+		u.ProviderID = info.Sub
 		if info.Name != "" {
 			u.Name = &info.Name
 		}

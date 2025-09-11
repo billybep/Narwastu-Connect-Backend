@@ -27,6 +27,8 @@ services:
     #   DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mydb?sslmode=disable
     ports:
       - "8080:8080" # expose API
+    # volumes:
+    #   - ./config/firebase_service_account.json:/app/config/firebase_service_account.json:ro
 
   postgres:
     image: postgres:15
