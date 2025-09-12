@@ -8,6 +8,7 @@ import (
 	"app/internal/common"
 	"app/internal/event"
 	"app/internal/member"
+	"app/internal/sermon"
 	"app/internal/verse"
 	"app/pkg/repository"
 
@@ -34,6 +35,9 @@ func main() {
 		&member.Site{},
 		&member.Member{},
 		&member.FamilyRelationship{},
+
+		// Khotbah
+		&sermon.Sermon{},
 	); err != nil {
 		log.Fatal(err)
 	}
@@ -45,6 +49,9 @@ func main() {
 	// if err := member.SeedMembers(repository.DB); err != nil {
 	// 	log.Fatal("Seeder error: ", err)
 	// }
+	if err := sermon.Seed(repository.DB); err != nil {
+		log.Fatal("failed seeding sermons:", err)
+	}
 
 	// Init Echo
 	e := echo.New()
@@ -110,8 +117,14 @@ func main() {
 	memberSvc := member.NewService(memberRepo)
 	memberH := member.NewHandler(memberSvc)
 
+	// Sermon routes
+	sermonRepo := sermon.NewRepository(repository.DB)
+	sermonSvc := sermon.NewService(sermonRepo)
+	sermonH := sermon.NewHandler(sermonSvc)
+
 	// Public routes
 	member.RegisterRoutes(e.Group(""), memberH)
+	sermon.RegisterRoutes(e.Group(""), sermonH)
 
 	// Start server
 	port := os.Getenv("PORT")
