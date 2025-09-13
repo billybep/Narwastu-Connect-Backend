@@ -16,8 +16,9 @@ type Site struct {
 }
 
 type Member struct {
-	ID            uint           `gorm:"primaryKey" json:"id"`
-	NIK           string         `gorm:"size:20;unique" json:"nik"`
+	ID uint `gorm:"primaryKey" json:"id"`
+	// NIK           string         `gorm:"size:20;unique" json:"nik"`
+	NIK           *string        `gorm:"uniqueIndex;default:null"`
 	FullName      string         `gorm:"size:100;not null" json:"fullName"`
 	FamilyName    string         `gorm:"size:100"`
 	PlaceOfBirth  string         `gorm:"size:50" json:"placeOfBirth"`
@@ -27,7 +28,7 @@ type Member struct {
 	Phone         string         `gorm:"size:20" json:"phone"`
 	Email         string         `gorm:"size:100" json:"email"`
 	BaptismDate   *time.Time     `json:"baptismDate"`
-	SiteID        *uint          `json:"siteId"`
+	SiteID        uint           `json:"siteId"`
 	Site          Site           `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"site"`
 	MaritalStatus string         `gorm:"size:20" json:"maritalStatus"`
 	PhotoURL      string         `json:"photoUrl"`

@@ -6,6 +6,7 @@ import (
 
 type Service interface {
 	GetWeeklyBirthdays() ([]Member, error)
+	CreateMember(member *Member) error
 }
 
 type service struct {
@@ -24,4 +25,8 @@ func (s *service) GetWeeklyBirthdays() ([]Member, error) {
 	end := start.AddDate(0, 0, 6)
 
 	return s.repo.FindBirthdaysInRange(start, end)
+}
+
+func (s *service) CreateMember(member *Member) error {
+	return s.repo.CreateMember(member)
 }

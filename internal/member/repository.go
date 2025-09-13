@@ -8,6 +8,7 @@ import (
 
 type Repository interface {
 	FindBirthdaysInRange(start, end time.Time) ([]Member, error)
+	CreateMember(member *Member) error
 }
 
 type repository struct {
@@ -28,4 +29,9 @@ func (r *repository) FindBirthdaysInRange(start, end time.Time) ([]Member, error
 		AND EXTRACT(DAY FROM date_of_birth) BETWEEN ? AND ?
 	`, int(start.Month()), start.Day(), end.Day()).Find(&members).Error
 	return members, err
+}
+
+// Create Member
+func (r *repository) CreateMember(member *Member) error {
+	return r.db.Create(member).Error
 }
