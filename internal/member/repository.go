@@ -27,7 +27,8 @@ func (r *repository) FindBirthdaysInRange(start, end time.Time) ([]Member, error
 		Where(`
 		EXTRACT(MONTH FROM date_of_birth) = ? 
 		AND EXTRACT(DAY FROM date_of_birth) BETWEEN ? AND ?
-	`, int(start.Month()), start.Day(), end.Day()).Find(&members).Error
+	`, int(start.Month()), start.Day(), end.Day()).
+		Order("EXTRACT(DAY FROM date_of_birth) ASC").Find(&members).Error
 	return members, err
 }
 

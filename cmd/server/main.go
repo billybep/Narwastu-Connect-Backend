@@ -49,9 +49,9 @@ func main() {
 	// if err := member.SeedMembers(repository.DB); err != nil {
 	// 	log.Fatal("Seeder error: ", err)
 	// }
-	if err := sermon.Seed(repository.DB); err != nil {
-		log.Fatal("failed seeding sermons:", err)
-	}
+	// if err := sermon.Seed(repository.DB); err != nil {
+	// 	log.Fatal("failed seeding sermons:", err)
+	// }
 
 	// Init Echo
 	e := echo.New()
