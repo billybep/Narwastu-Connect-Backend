@@ -8,6 +8,7 @@ import (
 	"app/internal/common"
 	"app/internal/event"
 	"app/internal/member"
+	"app/internal/schedule"
 	"app/internal/sermon"
 	"app/internal/verse"
 	"app/pkg/repository"
@@ -38,6 +39,9 @@ func main() {
 
 		// Khotbah
 		&sermon.Sermon{},
+
+		// Jadwal Melayani
+		&schedule.ServiceSchedule{},
 	); err != nil {
 		log.Fatal(err)
 	}
@@ -52,6 +56,12 @@ func main() {
 	// if err := sermon.Seed(repository.DB); err != nil {
 	// 	log.Fatal("failed seeding sermons:", err)
 	// }
+
+	if err := schedule.SeedSchedules(repository.DB); err != nil {
+		log.Fatal("failed seeding schedules:", err)
+	}
+
+	println("[Seeder] Done.")
 
 	// Init Echo
 	e := echo.New()
@@ -121,6 +131,12 @@ func main() {
 	sermonRepo := sermon.NewRepository(repository.DB)
 	sermonSvc := sermon.NewService(sermonRepo)
 	sermonH := sermon.NewHandler(sermonSvc)
+
+	// Services Schedule
+	scheduleRepo := schedule.NewRepository(repository.DB)
+	scheduleService := schedule.NewService(scheduleRepo)
+	scheduleHandler := schedule.NewHandler(scheduleService)
+	schedule.RegisterRoutes(e.Group(""), scheduleHandler)
 
 	// Public routes
 	member.RegisterRoutes(e.Group(""), memberH)
