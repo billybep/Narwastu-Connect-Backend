@@ -9,6 +9,7 @@ import (
 	"app/internal/event"
 	"app/internal/finance"
 	"app/internal/member"
+	"app/internal/organization"
 	"app/internal/schedule"
 	"app/internal/sermon"
 	"app/internal/verse"
@@ -48,6 +49,9 @@ func main() {
 		&finance.Account{},
 		&finance.Transaction{},
 		&finance.Balance{},
+
+		// Organization
+		&organization.Organization{},
 	); err != nil {
 		log.Fatal(err)
 	}
@@ -65,9 +69,15 @@ func main() {
 	// if err := schedule.SeedSchedules(repository.DB); err != nil {
 	// 	log.Fatal("failed seeding schedules:", err)
 	// }
-	if err := finance.SeedFinance(repository.DB); err != nil {
-		log.Fatal("failed seeding finance:", err)
+	// if err := finance.SeedFinance(repository.DB); err != nil {
+	// 	log.Fatal("failed seeding finance:", err)
+	// }
+	// seed data
+	if err := organization.Seed(repository.DB); err != nil {
+		log.Fatal(err)
 	}
+
+	log.Println("✅ Organization seeding done")
 
 	println("[Seeder] Done.")
 
@@ -151,6 +161,12 @@ func main() {
 	financeSvc := finance.NewService(financeRepo)
 	financeH := finance.NewHandler(financeSvc)
 	finance.RegisterRoutes(api, financeH)
+
+	// Organization
+	organizationRepo := organization.NewRepository(repository.DB)
+	organizationSvc := organization.NewService(organizationRepo)
+	organizationH := organization.NewHandler(organizationSvc)
+	organization.RegisterRoutes(api, organizationH)
 
 	// Public routes
 	member.RegisterRoutes(e.Group(""), memberH)

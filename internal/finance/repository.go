@@ -40,7 +40,11 @@ func (r *repository) CreateTransaction(tx *Transaction) error {
 
 func (r *repository) GetBalance(accountID uint) (int64, error) {
 	var bal Balance
-	err := r.db.Where("account_id = ?", accountID).First(&bal).Error
+	err := r.db.Where("account_id = ?", accountID).FirstOrCreate(&bal, Balance{
+		AccountID: accountID,
+		Balance:   0,
+	}).Error
+
 	if err != nil {
 		// kalau belum ada record balance, default 0
 		if err == gorm.ErrRecordNotFound {
