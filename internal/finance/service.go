@@ -119,13 +119,55 @@ type WeeklySummary struct {
 	ClosingBalance int64  `json:"closing_balance"`
 }
 
-func (s *service) GetWeeklySummary() ([]WeeklySummary, error) {
-	now := time.Now()
+// func (s *service) GetWeeklySummary() ([]WeeklySummary, error) {
+// 	now := time.Now()
 
-	weekday := int(now.Weekday()) // 0=Sunday
-	startOfThisWeek := now.AddDate(0, 0, -weekday)
-	start := startOfThisWeek.AddDate(0, 0, -7)
-	end := start.AddDate(0, 0, 6)
+// 	weekday := int(now.Weekday()) // 0=Sunday
+// 	startOfThisWeek := now.AddDate(0, 0, -weekday)
+// 	start := startOfThisWeek.AddDate(0, 0, -7)
+// 	end := start.AddDate(0, 0, 6)
+
+// 	accounts, err := s.repo.GetAccounts()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var summaries []WeeklySummary
+// 	for _, acc := range accounts {
+// 		// 🔑 ambil saldo real-time
+// 		openingBalance, err := s.repo.GetBalance(acc.ID)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		// ambil transaksi minggu ini
+// 		transactions, err := s.repo.FindWeeklyTransactions(acc.ID, start, end)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		// hitung closing balance
+// 		closingBalance := openingBalance
+// 		for _, t := range transactions {
+// 			if t.Type == "DEBIT" {
+// 				closingBalance += t.Amount
+// 			} else {
+// 				closingBalance -= t.Amount
+// 			}
+// 		}
+
+// 		summaries = append(summaries, WeeklySummary{
+// 			AccountID:      acc.ID,
+// 			AccountName:    acc.Name,
+// 			Description:    acc.Description,
+// 			ClosingBalance: closingBalance,
+// 		})
+// 	}
+
+// 	return summaries, nil
+// }
+
+func (s *service) GetWeeklySummary() ([]WeeklySummary, error) {
 
 	accounts, err := s.repo.GetAccounts()
 	if err != nil {
@@ -134,33 +176,17 @@ func (s *service) GetWeeklySummary() ([]WeeklySummary, error) {
 
 	var summaries []WeeklySummary
 	for _, acc := range accounts {
-		// 🔑 ambil saldo real-time
-		openingBalance, err := s.repo.GetBalance(acc.ID)
+		// 🔑 ambil saldo real-time (langsung dari balances table)
+		realBalance, err := s.repo.GetBalance(acc.ID)
 		if err != nil {
 			return nil, err
-		}
-
-		// ambil transaksi minggu ini
-		transactions, err := s.repo.FindWeeklyTransactions(acc.ID, start, end)
-		if err != nil {
-			return nil, err
-		}
-
-		// hitung closing balance
-		closingBalance := openingBalance
-		for _, t := range transactions {
-			if t.Type == "DEBIT" {
-				closingBalance += t.Amount
-			} else {
-				closingBalance -= t.Amount
-			}
 		}
 
 		summaries = append(summaries, WeeklySummary{
 			AccountID:      acc.ID,
 			AccountName:    acc.Name,
 			Description:    acc.Description,
-			ClosingBalance: closingBalance,
+			ClosingBalance: realBalance, // langsung pakai saldo nyata
 		})
 	}
 

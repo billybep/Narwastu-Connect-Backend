@@ -73,13 +73,13 @@ func main() {
 	// 	log.Fatal("failed seeding finance:", err)
 	// }
 	// seed data
-	if err := organization.Seed(repository.DB); err != nil {
-		log.Fatal(err)
-	}
+	// if err := organization.Seed(repository.DB); err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	log.Println("✅ Organization seeding done")
+	// log.Println("✅ Organization seeding done")
 
-	println("[Seeder] Done.")
+	// println("[Seeder] Done.")
 
 	// Init Echo
 	e := echo.New()
