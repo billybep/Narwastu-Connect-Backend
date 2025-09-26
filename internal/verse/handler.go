@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -48,28 +47,44 @@ func (h *VerseHandler) GetLatestVerse(c echo.Context) error {
 }
 
 // Like a verse
+// func (h *VerseHandler) LikeVerse(c echo.Context) error {
+// 	id, err := strconv.Atoi(c.Param("id"))
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid verse id"})
+// 	}
+
+// 	claimsRaw := c.Get("claims")
+// 	claims, ok := claimsRaw.(jwt.MapClaims)
+// 	if !ok {
+// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid claims"})
+// 	}
+// 	idRaw, ok := claims["user_id"]
+// 	if !ok {
+// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "id not in claims"})
+// 	}
+// 	userIDFloat, ok := idRaw.(float64)
+// 	if !ok {
+// 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "id is invalid type"})
+// 	}
+// 	userID := uint(userIDFloat)
+
+// 	if err := h.svc.LikeVerse(userID, uint(id)); err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+// 	}
+
+// 	return c.JSON(http.StatusOK, map[string]string{"message": "verse liked"})
+// }
+
 func (h *VerseHandler) LikeVerse(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	verseID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid verse id"})
 	}
 
-	claimsRaw := c.Get("claims")
-	claims, ok := claimsRaw.(jwt.MapClaims)
-	if !ok {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid claims"})
-	}
-	idRaw, ok := claims["user_id"]
-	if !ok {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "id not in claims"})
-	}
-	userIDFloat, ok := idRaw.(float64)
-	if !ok {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "id is invalid type"})
-	}
-	userID := uint(userIDFloat)
+	userID := c.Get("userID").(uint)
 
-	if err := h.svc.LikeVerse(userID, uint(id)); err != nil {
+	// FIX: param dibalik, userID dulu, verseID setelahnya
+	if err := h.svc.LikeVerse(userID, uint(verseID)); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
@@ -86,28 +101,4 @@ func (h *VerseHandler) ShareVerse(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, Response{Error: err.Error()})
 	}
 	return c.JSON(http.StatusOK, Response{Message: "verse shared"})
-}
-
-// Add comment
-func (h *VerseHandler) AddComment(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, Response{Error: "invalid verse id"})
-	}
-
-	var body struct {
-		User    string `json:"user"`
-		Content string `json:"content"`
-	}
-	if err := c.Bind(&body); err != nil {
-		return c.JSON(http.StatusBadRequest, Response{Error: "invalid request"})
-	}
-	if body.Content == "" {
-		return c.JSON(http.StatusBadRequest, Response{Error: "comment content required"})
-	}
-
-	if err := h.svc.AddComment(uint(id), body.Content, body.User); err != nil {
-		return c.JSON(http.StatusNotFound, Response{Error: err.Error()})
-	}
-	return c.JSON(http.StatusCreated, Response{Message: "comment added"})
 }

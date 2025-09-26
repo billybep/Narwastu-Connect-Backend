@@ -58,17 +58,3 @@ func (s *VerseService) ShareVerse(id uint) error {
 	}
 	return repository.DB.Model(&v).Update("shares", gorm.Expr("shares + ?", 1)).Error
 }
-
-// Add comment
-func (s *VerseService) AddComment(id uint, content string, user string) error {
-	var v Verse
-	if err := repository.DB.First(&v, id).Error; err != nil {
-		return errors.New("verse not found")
-	}
-	comment := Comment{
-		VerseID: id,
-		User:    user,
-		Content: content,
-	}
-	return repository.DB.Create(&comment).Error
-}

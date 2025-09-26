@@ -75,7 +75,7 @@ func (s *AuthService) HandleFirebaseIDToken(idToken string) (*User, error) {
 		u = &User{
 			Provider:   "google",
 			ProviderID: token.UID,
-			Email:      &email,
+			Email:      email,
 			Name:       &name,
 			AvatarURL:  &avatar,
 		}
@@ -100,15 +100,19 @@ func (s *AuthService) HandleFirebaseIDToken(idToken string) (*User, error) {
 
 func (s *AuthService) GenerateJWT(u *User) (string, error) {
 	secret := []byte(os.Getenv("JWT_SECRET"))
-	claims := jwt.MapClaims{
-		"user_id":  u.ID,
-		"email":    u.Email,
-		"provider": u.Provider,
-		"exp":      time.Now().Add(24 * time.Hour).Unix(),
-		"iat":      time.Now().Unix(),
+
+	claims := &JWTClaims{
+		UserID: u.ID,
+		Email:  u.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			// Bisa tambahkan expired time biar token gak abadi
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secret)
+	return token.SignedString([]byte(secret)) // jwtSecret kamu define di service
 }
 
 // Exchange code -> token -> userinfo, then upsert
@@ -142,7 +146,7 @@ func (s *AuthService) HandleGoogleCallback(code string) (*User, error) {
 		u = &User{
 			Provider:   "google",
 			ProviderID: info.ID,
-			Email:      &email,
+			Email:      email,
 			Name:       &name,
 			AvatarURL:  &avatar,
 		}
@@ -152,7 +156,7 @@ func (s *AuthService) HandleGoogleCallback(code string) (*User, error) {
 	} else {
 		// update minimal fields
 		if info.Email != "" {
-			u.Email = &info.Email
+			u.Email = info.Email
 		}
 		if info.Name != "" {
 			u.Name = &info.Name
@@ -196,7 +200,7 @@ func (s *AuthService) HandleGoogleIDToken(idToken string) (*User, error) {
 		u = &User{
 			Provider:   "google",
 			ProviderID: info.Sub,
-			Email:      &info.Email,
+			Email:      info.Email,
 			Name:       &info.Name,
 			AvatarURL:  &info.Picture,
 		}
@@ -215,4 +219,8 @@ func (s *AuthService) HandleGoogleIDToken(idToken string) (*User, error) {
 	}
 
 	return u, nil
+}
+
+func (s *AuthService) DeleteUser(userID uint) error {
+	return s.repo.DeleteUser(userID)
 }

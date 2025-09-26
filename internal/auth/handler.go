@@ -92,3 +92,13 @@ func (h *AuthHandler) MobileLogin(c echo.Context) error {
 func (h *AuthHandler) SignOut(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
+
+func (h *AuthHandler) DeleteMyAccount(c echo.Context) error {
+	userID := c.Get("userID").(uint)
+
+	if err := h.service.DeleteUser(userID); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

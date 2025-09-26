@@ -35,6 +35,7 @@ services:
     # volumes:
     #   - ./config/firebase_service_account.json:/app/config/firebase_service_account.json:ro
 
+
   postgres:
     image: postgres:15
     container_name: narwastuconnect_pg

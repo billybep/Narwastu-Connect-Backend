@@ -29,3 +29,8 @@ func (r *UserRepository) FindByEmail(email string) (*User, error) {
 	}
 	return &u, nil
 }
+
+func (r *UserRepository) DeleteUser(userID uint) error {
+	// Cascade otomatis handle VerseLikes karena sudah ada OnDelete:CASCADE
+	return repository.DB.Delete(&User{}, userID).Error
+}

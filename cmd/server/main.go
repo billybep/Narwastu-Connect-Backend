@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"app/internal/auth"
-	"app/internal/common"
 	"app/internal/event"
 	"app/internal/finance"
 	"app/internal/member"
+	myMiddleware "app/internal/middleware" // 🔥 pakai middleware custom kamu
 	"app/internal/organization"
 	"app/internal/schedule"
 	"app/internal/sermon"
@@ -16,12 +16,10 @@ import (
 	"app/pkg/repository"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	println("[Fx Main] Called")
-
 	// Init DB
 	repository.InitDB()
 	if err := repository.DB.AutoMigrate(
@@ -30,7 +28,6 @@ func main() {
 
 		// Verse of the day
 		&verse.Verse{},
-		&verse.Comment{},
 		&verse.VerseLike{},
 		&event.Event{},
 
@@ -83,9 +80,9 @@ func main() {
 
 	// Init Echo
 	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	e.Use(echoMiddleware.Logger())
+	e.Use(echoMiddleware.Recover())
+	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
 		AllowHeaders: []string{"Content-Type", "Authorization"},
@@ -121,7 +118,10 @@ func main() {
 	// ========================
 	// 🔒 Protected Routes (/api/*)
 	// ========================
-	api := e.Group("/api", common.StrictJWTMiddleware)
+	// api := e.Group("/api", common.StrictJWTMiddleware)
+	api := e.Group("/api", myMiddleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
+
+	api.DELETE("/auth/delete", h.DeleteMyAccount) // 🔥 delete account pakai JWT
 
 	// Sample protected route
 	api.GET("/me", func(c echo.Context) error {
@@ -132,7 +132,6 @@ func main() {
 	// Verse actions (protected)
 	api.POST("/verse/:id/like", verseH.LikeVerse)
 	api.POST("/verse/:id/share", verseH.ShareVerse)
-	api.POST("/verse/:id/comment", verseH.AddComment)
 
 	// Event routes
 	eventRepo := event.NewRepository(repository.DB)
