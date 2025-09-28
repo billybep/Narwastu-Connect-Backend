@@ -1,0 +1,30 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+<!-- ## [Unreleased]
+### Added
+- Fitur baru yang sedang dikembangkan
+
+### Changed
+- Perubahan perilaku atau update fitur lama
+
+### Fixed
+- Bugfix yang sudah diperbaiki
+
+### Security
+- Patch keamanan -->
+
+---
+
+## [1.0.0] - 2025-09-29
+### Added
+- 
+
+### Changed
+- Optimasi query Postgres untuk perhitungan minggu berjalan
+
+### Fixed
+- Perbaikan fungsi untuk endpoint weeklybirthday `response null pada minggu berjalan dengan range akhir bulan dan awal bulan`
