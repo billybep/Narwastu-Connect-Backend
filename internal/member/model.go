@@ -16,8 +16,7 @@ type Site struct {
 }
 
 type Member struct {
-	ID uint `gorm:"primaryKey" json:"id"`
-	// NIK           string         `gorm:"size:20;unique" json:"nik"`
+	ID            uint           `gorm:"primaryKey" json:"id"`
 	NIK           *string        `gorm:"uniqueIndex;default:null"`
 	FullName      string         `gorm:"size:100;not null" json:"fullName"`
 	FamilyName    string         `gorm:"size:100"`

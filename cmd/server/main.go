@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -12,6 +13,7 @@ import (
 	"app/internal/organization"
 	"app/internal/schedule"
 	"app/internal/sermon"
+	supabase "app/internal/storage"
 	"app/internal/verse"
 	"app/pkg/repository"
 
@@ -52,6 +54,24 @@ func main() {
 	); err != nil {
 		log.Fatal(err)
 	}
+
+	// Supabase
+	supabaseClient := supabase.NewClient(
+		os.Getenv("SUPABASE_URL")+"/storage/v1",
+		os.Getenv("SUPABASE_KEY"),
+		os.Getenv("SUPABASE_BUCKET"),
+	)
+	log.Println("SUPABASE_URL =", os.Getenv("SUPABASE_URL"))
+	log.Println("SUPABASE_KEY =", os.Getenv("SUPABASE_KEY"))
+	log.Println("SUPABASE_BUCKET =", os.Getenv("SUPABASE_BUCKET"))
+
+	fmt.Println("🔥 Supabase initialized")
+
+	// supabaseURL := os.Getenv("SUPABASE_URL")
+	// supabaseKey := os.Getenv("SUPABASE_KEY")
+	// supabaseBucket := os.Getenv("SUPABASE_BUCKET")
+
+	// supabaseClient := supabase.NewClient(supabaseURL, supabaseKey, supabaseBucket)
 
 	// Init Firebase
 	auth.InitFirebase()
@@ -140,9 +160,11 @@ func main() {
 	eventH.RegisterRoutes(e, api)
 
 	// Member (Weekly Birthday)
+
 	memberRepo := member.NewRepository(repository.DB)
 	memberSvc := member.NewService(memberRepo)
-	memberH := member.NewHandler(memberSvc)
+	// memberH := member.NewHandler(memberSvc)
+	memberH := member.NewHandler(memberSvc, supabaseClient)
 
 	// Sermon routes
 	sermonRepo := sermon.NewRepository(repository.DB)
