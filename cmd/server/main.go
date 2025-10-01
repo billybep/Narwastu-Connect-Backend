@@ -61,9 +61,6 @@ func main() {
 		os.Getenv("SUPABASE_KEY"),
 		os.Getenv("SUPABASE_BUCKET"),
 	)
-	log.Println("SUPABASE_URL =", os.Getenv("SUPABASE_URL"))
-	log.Println("SUPABASE_KEY =", os.Getenv("SUPABASE_KEY"))
-	log.Println("SUPABASE_BUCKET =", os.Getenv("SUPABASE_BUCKET"))
 
 	fmt.Println("🔥 Supabase initialized")
 
