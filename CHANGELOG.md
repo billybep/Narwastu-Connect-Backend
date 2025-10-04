@@ -4,20 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- ## [Unreleased]
+<!-- 
+
+## [Unreleased]
+## [1.1.2] - Date
 ### Added
-- Fitur baru yang sedang dikembangkan
+- 
 
 ### Changed
-- Perubahan perilaku atau update fitur lama
+- 
 
 ### Fixed
-- Bugfix yang sudah diperbaiki
+- 
 
 ### Security
-- Patch keamanan -->
+- Patch ...
 
----
+-->
+
+## [1.1.1] - 2025-10-04
+### Added
+- endpoint upload warta
+- endpoint get latest warta
 
 ## [1.1.0] - 2025-10-01
 ### Added

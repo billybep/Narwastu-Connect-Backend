@@ -2,6 +2,7 @@ package member
 
 import (
 	supabase "app/internal/storage"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -245,6 +246,7 @@ func (h *Handler) DeleteMember(c echo.Context) error {
 }
 
 // Upload Profile Picture
+// Upload Profile Picture
 func (h *Handler) UploadAvatar(c echo.Context) error {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -257,24 +259,32 @@ func (h *Handler) UploadAvatar(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "member not found"})
 	}
-
 	if member.DeletedAt.Valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "member has been soft deleted"})
 	}
 
+	// ✅ Hapus file lama di Supabase (jika ada)
+	if member.PhotoURL != "" {
+		if err := h.supabaseClient.DeleteFile(member.PhotoURL); err != nil {
+			// Jangan blok proses upload, hanya log warning
+			fmt.Printf("[WARN] gagal hapus avatar lama: %v\n", err)
+		}
+	}
+
+	// ✅ Ambil file baru dari form
 	file, fileHeader, err := c.Request().FormFile("file")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "failed to read file"})
 	}
 	defer file.Close()
 
-	// ✅ Upload ke Supabase
+	// ✅ Upload avatar baru ke Supabase
 	url, err := h.supabaseClient.UploadAvatar(file, fileHeader, uint(id))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	// ✅ Update database
+	// ✅ Update URL avatar di database
 	if err := h.service.UpdateMemberAvatar(uint(id), url); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

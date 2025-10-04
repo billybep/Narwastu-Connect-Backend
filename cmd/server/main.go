@@ -9,16 +9,19 @@ import (
 	"app/internal/event"
 	"app/internal/finance"
 	"app/internal/member"
-	myMiddleware "app/internal/middleware" // 🔥 pakai middleware custom kamu
 	"app/internal/organization"
 	"app/internal/schedule"
 	"app/internal/sermon"
-	supabase "app/internal/storage"
 	"app/internal/verse"
+	"app/internal/wartajemaat"
 	"app/pkg/repository"
 
-	"github.com/labstack/echo/v4"
+	myMiddleware "app/internal/middleware" // 🔥 pakai middleware custom kamu
+	supabase "app/internal/storage"
+
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -51,6 +54,9 @@ func main() {
 
 		// Organization
 		&organization.Organization{},
+
+		// WartaJemaat
+		&wartajemaat.WartaJemaat{},
 	); err != nil {
 		log.Fatal(err)
 	}
@@ -63,12 +69,6 @@ func main() {
 	)
 
 	fmt.Println("🔥 Supabase initialized")
-
-	// supabaseURL := os.Getenv("SUPABASE_URL")
-	// supabaseKey := os.Getenv("SUPABASE_KEY")
-	// supabaseBucket := os.Getenv("SUPABASE_BUCKET")
-
-	// supabaseClient := supabase.NewClient(supabaseURL, supabaseKey, supabaseBucket)
 
 	// Init Firebase
 	auth.InitFirebase()
@@ -185,6 +185,14 @@ func main() {
 	organizationSvc := organization.NewService(organizationRepo)
 	organizationH := organization.NewHandler(organizationSvc)
 	organization.RegisterRoutes(api, organizationH)
+
+	// ========================
+	// 📰 Warta Jemaat Routes
+	// ========================
+	wartaService := wartajemaat.NewService(repository.DB, supabaseClient)
+	wartaHandler := wartajemaat.NewHandler(wartaService)
+	wartajemaat.RegisterRoutes(e.Group(""), wartaHandler)
+	// wartajemaat.RegisterRoutes(api, wartaHandler) private
 
 	// Public routes
 	member.RegisterRoutes(e.Group(""), memberH)

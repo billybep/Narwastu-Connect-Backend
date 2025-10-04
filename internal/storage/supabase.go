@@ -27,6 +27,7 @@ func NewClient(url, key, bucket string) *Client {
 	}
 }
 
+// Member Avatar (Anggota Jemaat)
 func (c *Client) UploadAvatar(file multipart.File, fileHeader *multipart.FileHeader, memberID uint) (string, error) {
 	// ✅ Buat nama file unik
 	ext := filepath.Ext(fileHeader.Filename)
@@ -36,9 +37,11 @@ func (c *Client) UploadAvatar(file multipart.File, fileHeader *multipart.FileHea
 	// ✅ Deteksi content type dari ekstensi
 	contentType := "application/octet-stream"
 	extLower := strings.ToLower(ext)
-	if extLower == ".jpg" || extLower == ".jpeg" {
+
+	switch extLower {
+	case ".jpg", ".jpeg":
 		contentType = "image/jpeg"
-	} else if extLower == ".png" {
+	case ".png":
 		contentType = "image/png"
 	}
 
@@ -69,5 +72,72 @@ func (c *Client) UploadAvatar(file multipart.File, fileHeader *multipart.FileHea
 		filePath,
 	)
 
+	return publicURL, nil
+}
+
+func (c *Client) DeleteFile(publicURL string) error {
+	// Contoh publicURL:
+	// https://xxxx.supabase.co/storage/v1/object/public/DevelopNC/avatars/42_123.jpg
+
+	parts := strings.Split(publicURL, fmt.Sprintf("/%s/", c.bucket))
+	if len(parts) < 2 {
+		return fmt.Errorf("invalid file URL")
+	}
+	filePath := parts[1]
+
+	// 🗑️ Hapus file dari Supabase Storage
+	_, err := c.storage.RemoveFile(c.bucket, []string{filePath})
+	if err != nil {
+		return fmt.Errorf("failed to delete old file: %v", err)
+	}
+
+	return nil
+}
+
+// Upload Warta Jemaat
+func (c *Client) UploadWartaJemaat(file multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+	ext := filepath.Ext(fileHeader.Filename)
+	if ext == "" {
+		ext = ".pdf" // default
+	}
+
+	now := time.Now()
+	year := now.Year()
+	month := int(now.Month())
+
+	// Buat random suffix (pakai UnixNano biar unik)
+	fileName := fmt.Sprintf("warta-%d-%02d-%d%s", year, month, time.Now().UnixNano(), ext)
+	filePath := fmt.Sprintf("wartajemaat/%s", fileName)
+
+	contentType := "application/pdf"
+	extLower := strings.ToLower(ext)
+	switch extLower {
+	case ".jpg", ".jpeg":
+		contentType = "image/jpeg"
+	case ".png":
+		contentType = "image/png"
+	}
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, file); err != nil {
+		return "", fmt.Errorf("failed to read file: %v", err)
+	}
+
+	// Upload ke Supabase
+	_, err := c.storage.UploadFile(
+		c.bucket,
+		filePath,
+		&buf,
+		storage_go.FileOptions{
+			ContentType: &contentType,
+			Upsert:      func(b bool) *bool { return &b }(true),
+		},
+	)
+	if err != nil {
+		return "", fmt.Errorf("upload to supabase failed: %v", err)
+	}
+
+	// Public URL
+	publicURL := fmt.Sprintf("%s/object/public/%s/%s", c.baseURL, c.bucket, filePath)
 	return publicURL, nil
 }
