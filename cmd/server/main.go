@@ -100,7 +100,7 @@ func main() {
 
 	// log.Println("✅ Organization seeding done")
 
-	// admin.Seed(repository.DB)
+	admin.Seed(repository.DB)
 	// println("[Seeder] Done.")
 
 	// Init Echo
