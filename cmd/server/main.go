@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"app/internal/admin"
 	"app/internal/auth"
 	"app/internal/event"
 	"app/internal/finance"
@@ -57,6 +58,12 @@ func main() {
 
 		// WartaJemaat
 		&wartajemaat.WartaJemaat{},
+
+		/**
+		#### ADMIN ------------------
+		*/
+		&admin.Admin{},
+		/* -------------------------- */
 	); err != nil {
 		log.Fatal(err)
 	}
@@ -93,6 +100,7 @@ func main() {
 
 	// log.Println("✅ Organization seeding done")
 
+	// admin.Seed(repository.DB)
 	// println("[Seeder] Done.")
 
 	// Init Echo
@@ -197,6 +205,18 @@ func main() {
 	// Public routes
 	member.RegisterRoutes(e.Group(""), memberH)
 	sermon.RegisterRoutes(e.Group(""), sermonH)
+
+	/**
+	ADMIN ROUTES
+	*/
+	adminRepo := admin.NewRepository(repository.DB)
+	adminSvc := admin.NewService(adminRepo)
+	adminH := admin.NewHandler(adminSvc)
+
+	// Untuk admin kita pisahkan prefix /admin
+	// dan group ini TIDAK menggunakan JWT global, karena login pakai 2FA dulu
+	adminGroup := e.Group("/admin")
+	admin.RegisterRoutes(adminGroup, adminH)
 
 	// Start server
 	port := os.Getenv("PORT")
