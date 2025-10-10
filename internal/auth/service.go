@@ -24,20 +24,6 @@ func NewAuthService(repo *UserRepository, cfg *oauth2.Config, fb *auth.Client) *
 	return &AuthService{repo: repo, config: cfg, firebaseAuth: fb}
 }
 
-// init firebase client sekali di main.go
-// func NewFirebaseAuth() *auth.Client {
-// 	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_CREDENTIALS")) // serviceAccountKey.json
-// 	app, err := firebase.NewApp(context.Background(), nil, opt)
-// 	if err != nil {
-// 		panic("failed to init firebase app: " + err.Error())
-// 	}
-// 	client, err := app.Auth(context.Background())
-// 	if err != nil {
-// 		panic("failed to init firebase auth: " + err.Error())
-// 	}
-// 	return client
-// }
-
 func NewFirebaseAuth() *auth.Client {
 	// langsung return client global hasil InitFirebase()
 	if FirebaseAuth == nil {

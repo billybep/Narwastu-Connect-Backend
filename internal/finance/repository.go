@@ -12,6 +12,7 @@ type Repository interface {
 	CreateTransaction(tx *Transaction) error
 	GetBalance(accountID uint) (int64, error)
 	FindWeeklyTransactions(accountID uint, start, end time.Time) ([]Transaction, error)
+	UpdateBalance(accountID uint, delta int64) error
 }
 
 type repository struct {

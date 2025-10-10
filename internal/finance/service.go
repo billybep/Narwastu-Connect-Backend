@@ -119,54 +119,6 @@ type WeeklySummary struct {
 	ClosingBalance int64  `json:"closing_balance"`
 }
 
-// func (s *service) GetWeeklySummary() ([]WeeklySummary, error) {
-// 	now := time.Now()
-
-// 	weekday := int(now.Weekday()) // 0=Sunday
-// 	startOfThisWeek := now.AddDate(0, 0, -weekday)
-// 	start := startOfThisWeek.AddDate(0, 0, -7)
-// 	end := start.AddDate(0, 0, 6)
-
-// 	accounts, err := s.repo.GetAccounts()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	var summaries []WeeklySummary
-// 	for _, acc := range accounts {
-// 		// 🔑 ambil saldo real-time
-// 		openingBalance, err := s.repo.GetBalance(acc.ID)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		// ambil transaksi minggu ini
-// 		transactions, err := s.repo.FindWeeklyTransactions(acc.ID, start, end)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		// hitung closing balance
-// 		closingBalance := openingBalance
-// 		for _, t := range transactions {
-// 			if t.Type == "DEBIT" {
-// 				closingBalance += t.Amount
-// 			} else {
-// 				closingBalance -= t.Amount
-// 			}
-// 		}
-
-// 		summaries = append(summaries, WeeklySummary{
-// 			AccountID:      acc.ID,
-// 			AccountName:    acc.Name,
-// 			Description:    acc.Description,
-// 			ClosingBalance: closingBalance,
-// 		})
-// 	}
-
-// 	return summaries, nil
-// }
-
 func (s *service) GetWeeklySummary() ([]WeeklySummary, error) {
 
 	accounts, err := s.repo.GetAccounts()
@@ -201,12 +153,6 @@ func getLastWeekRange() (time.Time, time.Time) {
 	end := start.AddDate(0, 0, 6)
 	return start, end
 }
-
-// func (s *service) GetWeeklyTransactions(accountID uint) ([]Transaction, time.Time, time.Time, error) {
-// 	start, end := getLastWeekRange()
-// 	txs, err := s.repo.FindWeeklyTransactions(accountID, start, end)
-// 	return txs, start, end, err
-// }
 
 func (s *service) GetWeeklyTransactions(accountID uint) ([]TransactionDTO, time.Time, time.Time, error) {
 	start, end := getLastWeekRange()

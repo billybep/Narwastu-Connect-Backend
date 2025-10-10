@@ -5,6 +5,7 @@ import (
 )
 
 type Repository interface {
+	GetByID(id uint) (*Admin, error)
 	FindByEmail(email string) (*Admin, error)
 	Create(admin *Admin) error
 	GetAll() ([]Admin, error)
@@ -17,6 +18,14 @@ type repository struct {
 
 func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
+}
+
+func (r *repository) GetByID(id uint) (*Admin, error) {
+	var admin Admin
+	if err := r.db.First(&admin, id).Error; err != nil {
+		return nil, err
+	}
+	return &admin, nil
 }
 
 func (r *repository) FindByEmail(email string) (*Admin, error) {

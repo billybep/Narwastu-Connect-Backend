@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- 
 
 ## [Unreleased]
-## [1.1.3] - Date
+## [1.1.6] - Date
 ### Added
-- 
+-
 
 ### Changed
 - 
@@ -18,9 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 
 
 ### Security
-- Patch ...
+-
 
 -->
+
+## [1.1.5] - 2025-10-10
+### Added
+- CRUD Finance & Events
+- Role Base 
 
 ## [1.1.4] - 2025-10-07
 ### Added

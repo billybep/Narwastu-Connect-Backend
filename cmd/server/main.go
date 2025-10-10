@@ -8,7 +8,9 @@ import (
 	"app/internal/admin"
 	"app/internal/auth"
 	"app/internal/event"
+	adminevent "app/internal/event/admin"
 	"app/internal/finance"
+	adminfinance "app/internal/finance/admin"
 	"app/internal/member"
 	"app/internal/organization"
 	"app/internal/schedule"
@@ -100,7 +102,7 @@ func main() {
 
 	// log.Println("✅ Organization seeding done")
 
-	admin.Seed(repository.DB)
+	// admin.Seed(repository.DB)
 	// println("[Seeder] Done.")
 
 	// Init Echo
@@ -143,7 +145,6 @@ func main() {
 	// ========================
 	// 🔒 Protected Routes (/api/*)
 	// ========================
-	// api := e.Group("/api", common.StrictJWTMiddleware)
 	api := e.Group("/api", myMiddleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
 
 	api.DELETE("/auth/delete", h.DeleteMyAccount) // 🔥 delete account pakai JWT
@@ -207,7 +208,7 @@ func main() {
 	sermon.RegisterRoutes(e.Group(""), sermonH)
 
 	/**
-	ADMIN ROUTES
+	ADMIN ROUTES ---------------------------------------------------------------
 	*/
 	adminRepo := admin.NewRepository(repository.DB)
 	adminSvc := admin.NewService(adminRepo)
@@ -216,7 +217,24 @@ func main() {
 	// Untuk admin kita pisahkan prefix /admin
 	// dan group ini TIDAK menggunakan JWT global, karena login pakai 2FA dulu
 	adminGroup := e.Group("/admin")
+	adminGroup.POST("/login", adminH.Login)
+
 	admin.RegisterRoutes(adminGroup, adminH)
+
+	// 🎉 Event Admin Routes
+	eventAdminRepo := adminevent.NewRepository(repository.DB)
+	eventAdminService := adminevent.NewService(eventAdminRepo)
+	eventAdminHandler := adminevent.NewHandler(eventAdminService)
+	adminevent.RegisterRoutes(adminGroup, eventAdminHandler)
+
+	// =========================
+	// 📊 Finance Admin Routes
+	// =========================
+	financeAdminService := adminfinance.NewService(financeRepo)
+	financeAdminHandler := adminfinance.NewHandler(financeAdminService)
+	adminfinance.RegisterRoutes(adminGroup, financeAdminHandler)
+
+	/* ------------------------------------------------------------------------- */
 
 	// Start server
 	port := os.Getenv("PORT")
