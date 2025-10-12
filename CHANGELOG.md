@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -->
 
+## [1.1.6] - 2025-10-12
+### Added
+- CRUD untuk Jadwal Pelayan Altar
+
 ## [1.1.5] - 2025-10-10
 ### Added
 - CRUD Finance & Events
