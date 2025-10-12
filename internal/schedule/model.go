@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type ServiceSchedule struct {
@@ -18,4 +19,5 @@ type ServiceSchedule struct {
 	Multimedia    datatypes.JSON `json:"multimedia"`
 	Collectors    datatypes.JSON `json:"collectors"`
 	WorshipGroups datatypes.JSON `json:"worshipGroups"`
+	DeletedAt     gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }

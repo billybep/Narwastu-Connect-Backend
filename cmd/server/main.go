@@ -14,6 +14,7 @@ import (
 	"app/internal/member"
 	"app/internal/organization"
 	"app/internal/schedule"
+	adminschedule "app/internal/schedule/admin"
 	"app/internal/sermon"
 	"app/internal/verse"
 	"app/internal/wartajemaat"
@@ -221,7 +222,9 @@ func main() {
 
 	admin.RegisterRoutes(adminGroup, adminH)
 
+	// =========================
 	// 🎉 Event Admin Routes
+	// =========================
 	eventAdminRepo := adminevent.NewRepository(repository.DB)
 	eventAdminService := adminevent.NewService(eventAdminRepo)
 	eventAdminHandler := adminevent.NewHandler(eventAdminService)
@@ -233,6 +236,14 @@ func main() {
 	financeAdminService := adminfinance.NewService(financeRepo)
 	financeAdminHandler := adminfinance.NewHandler(financeAdminService)
 	adminfinance.RegisterRoutes(adminGroup, financeAdminHandler)
+
+	// =========================
+	// 📅 Schedule Admin Routes
+	// =========================
+	scheduleAdminRepo := adminschedule.NewRepository(repository.DB)
+	scheduleAdminService := adminschedule.NewService(scheduleAdminRepo)
+	scheduleAdminHandler := adminschedule.NewHandler(scheduleAdminService)
+	adminschedule.RegisterRoutes(adminGroup, scheduleAdminHandler)
 
 	/* ------------------------------------------------------------------------- */
 
