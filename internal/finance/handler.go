@@ -76,24 +76,6 @@ func (h *Handler) GetWeeklySummary(c echo.Context) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-// func (h *Handler) GetWeeklyTransactions(c echo.Context) error {
-// 	idStr := c.Param("id")
-// 	accountID, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid account id"})
-// 	}
-
-// 	txs, start, end, err := h.svc.GetWeeklyTransactions(uint(accountID))
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-// 	}
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"range":        start.Format("2006-01-02") + " s/d " + end.Format("2006-01-02"),
-// 		"account_id":   accountID,
-// 		"transactions": txs,
-// 	})
-// }
-
 func (h *Handler) GetWeeklyTransactions(c echo.Context) error {
 	idStr := c.Param("id")
 	accountID, err := strconv.Atoi(idStr)

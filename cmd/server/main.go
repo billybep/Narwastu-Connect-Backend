@@ -13,6 +13,7 @@ import (
 	adminfinance "app/internal/finance/admin"
 	"app/internal/member"
 	"app/internal/organization"
+	adminorganization "app/internal/organization/admin"
 	"app/internal/schedule"
 	adminschedule "app/internal/schedule/admin"
 	"app/internal/sermon"
@@ -244,6 +245,14 @@ func main() {
 	scheduleAdminService := adminschedule.NewService(scheduleAdminRepo)
 	scheduleAdminHandler := adminschedule.NewHandler(scheduleAdminService)
 	adminschedule.RegisterRoutes(adminGroup, scheduleAdminHandler)
+
+	// =========================
+	// 🏢 Organization Admin Routes
+	// =========================
+	organizationAdminRepo := adminorganization.NewRepository(repository.DB)
+	organizationAdminService := adminorganization.NewService(organizationAdminRepo)
+	organizationAdminHandler := adminorganization.NewHandler(organizationAdminService, supabaseClient)
+	adminorganization.RegisterRoutes(adminGroup, organizationAdminHandler)
 
 	/* ------------------------------------------------------------------------- */
 

@@ -141,3 +141,33 @@ func (c *Client) UploadWartaJemaat(file multipart.File, fileHeader *multipart.Fi
 	publicURL := fmt.Sprintf("%s/object/public/%s/%s", c.baseURL, c.bucket, filePath)
 	return publicURL, nil
 }
+
+// Upload Organization Photo
+func (c *Client) UploadOrganizationPhoto(file multipart.File, fileHeader *multipart.FileHeader, orgID uint) (string, error) {
+	ext := filepath.Ext(fileHeader.Filename)
+	fileName := fmt.Sprintf("organization/%d_%d%s", orgID, time.Now().Unix(), ext)
+	filePath := fmt.Sprintf("%s", fileName)
+
+	contentType := "application/octet-stream"
+	if strings.HasSuffix(strings.ToLower(ext), ".jpg") || strings.HasSuffix(strings.ToLower(ext), ".jpeg") {
+		contentType = "image/jpeg"
+	} else if strings.HasSuffix(strings.ToLower(ext), ".png") {
+		contentType = "image/png"
+	}
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, file); err != nil {
+		return "", fmt.Errorf("failed to read file: %v", err)
+	}
+
+	_, err := c.storage.UploadFile(c.bucket, filePath, &buf, storage_go.FileOptions{
+		ContentType: &contentType,
+		Upsert:      func(b bool) *bool { return &b }(true),
+	})
+	if err != nil {
+		return "", fmt.Errorf("upload to supabase failed: %v", err)
+	}
+
+	publicURL := fmt.Sprintf("%s/object/public/%s/%s", c.baseURL, c.bucket, filePath)
+	return publicURL, nil
+}

@@ -246,7 +246,6 @@ func (h *Handler) DeleteMember(c echo.Context) error {
 }
 
 // Upload Profile Picture
-// Upload Profile Picture
 func (h *Handler) UploadAvatar(c echo.Context) error {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
