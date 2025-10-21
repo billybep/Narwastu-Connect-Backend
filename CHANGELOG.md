@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- 
 
 ## [Unreleased]
-## [1.1.6] - Date
+## [1.1.7] - 2025-10-21
 ### Added
--
+- crud for admin dashboard endpoint
 
 ### Changed
 - 
@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -
 
 -->
+
+## [1.1.7] - 2025-10-21
+### Added
+- crud for admin dashboard endpoint
 
 ## [1.1.6] - 2025-10-12
 ### Added
