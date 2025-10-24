@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"app/internal/admin"
+	admindashboard "app/internal/admin/dashboard"
 	"app/internal/auth"
 	"app/internal/event"
 	adminevent "app/internal/event/admin"
@@ -253,6 +254,14 @@ func main() {
 	organizationAdminService := adminorganization.NewService(organizationAdminRepo)
 	organizationAdminHandler := adminorganization.NewHandler(organizationAdminService, supabaseClient)
 	adminorganization.RegisterRoutes(adminGroup, organizationAdminHandler)
+
+	// =========================
+	// 📊 Dashboard Admin Routes
+	// =========================
+	dashboardRepo := admindashboard.NewRepository(repository.DB)
+	dashboardService := admindashboard.NewService(dashboardRepo)
+	dashboardHandler := admindashboard.NewHandler(dashboardService)
+	admindashboard.RegisterRoutes(adminGroup, dashboardHandler)
 
 	/* ------------------------------------------------------------------------- */
 

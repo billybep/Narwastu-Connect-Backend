@@ -7,20 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- 
 
 ## [Unreleased]
-## [1.1.7] - 2025-10-21
+## [1.1.9] - DATE
 ### Added
-- crud for admin dashboard endpoint
+- 
 
 ### Changed
-- 
+- Tambah endpoint untuk dashboard
 
 ### Fixed
 - 
 
 ### Security
--
+- fix admin auth, hanya system_administrator CRUD admin
 
 -->
+
+## [1.1.8] - 2025-10-24
+### Added
+- Tambah endpoint untuk dashboard
+
+### Fixed
+- fix admin auth, hanya system_administrator CRUD admin
 
 ## [1.1.7] - 2025-10-21
 ### Added

@@ -40,10 +40,5 @@ func (s *service) DeleteOrganization(id uint) error {
 }
 
 func (s *service) UpdateProfilePic(id uint, url string) error {
-	org, err := s.repo.GetByID(id)
-	if err != nil {
-		return err
-	}
-	org.ProfilePic = url
-	return s.repo.Update(org)
+	return s.repo.UpdateProfilePic(id, url)
 }

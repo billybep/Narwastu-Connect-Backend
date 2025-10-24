@@ -23,10 +23,13 @@ func AdminJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, echo.Map{"error": "invalid or expired token"})
 		}
 
-		// Simpan informasi admin ke context agar bisa digunakan handler selanjutnya
-		c.Set("admin_id", claims.AdminID)
-		c.Set("admin_email", claims.Email)
-		c.Set("admin_role", claims.Role)
+		// Simpan objek admin ke context
+		adminObj := &Admin{
+			ID:    claims.AdminID,
+			Email: claims.Email,
+			Role:  Role(claims.Role),
+		}
+		c.Set("admin", adminObj)
 
 		return next(c)
 	}

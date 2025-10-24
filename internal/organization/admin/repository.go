@@ -11,6 +11,7 @@ type Repository interface {
 	GetAll() ([]organization.Organization, error)
 	GetByID(id uint) (*organization.Organization, error)
 	Update(org *organization.Organization) error
+	UpdateProfilePic(id uint, url string) error
 	SoftDelete(id uint) error
 }
 
@@ -40,6 +41,13 @@ func (r *repository) GetByID(id uint) (*organization.Organization, error) {
 
 func (r *repository) Update(org *organization.Organization) error {
 	return r.db.Save(org).Error
+}
+
+// UpdateProfilePic memperbarui URL foto organisasi
+func (r *repository) UpdateProfilePic(id uint, url string) error {
+	return r.db.Model(&organization.Organization{}).
+		Where("id = ?", id).
+		Update("profile_pic", url).Error
 }
 
 func (r *repository) SoftDelete(id uint) error {

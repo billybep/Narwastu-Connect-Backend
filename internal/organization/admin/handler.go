@@ -3,6 +3,7 @@ package admin
 import (
 	"app/internal/organization"
 	supabase "app/internal/storage"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -81,7 +82,7 @@ func (h *Handler) DeleteOrganization(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "organization deleted (soft)"})
 }
 
-// UPLOAD FOTO
+// Upload Profile Picture
 func (h *Handler) UploadProfilePic(c echo.Context) error {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -89,17 +90,36 @@ func (h *Handler) UploadProfilePic(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid ID"})
 	}
 
+	// ✅ Cek apakah data masih aktif
+	org, err := h.service.GetByID(uint(id))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "organization not found"})
+	}
+	if org.DeletedAt.Valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "organization has been soft deleted"})
+	}
+
+	// ✅ Hapus foto lama dari Supabase (jika ada)
+	if org.ProfilePic != "" {
+		if err := h.supabaseClient.DeleteFile(org.ProfilePic); err != nil {
+			fmt.Printf("[WARN] gagal hapus foto lama: %v\n", err)
+		}
+	}
+
+	// ✅ Ambil file dari form
 	file, fileHeader, err := c.Request().FormFile("file")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "failed to read file"})
 	}
 	defer file.Close()
 
+	// ✅ Upload ke Supabase
 	url, err := h.supabaseClient.UploadOrganizationPhoto(file, fileHeader, uint(id))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
+	// ✅ Simpan URL baru ke DB
 	if err := h.service.UpdateProfilePic(uint(id), url); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
