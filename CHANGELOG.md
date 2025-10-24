@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- 
 
 ## [Unreleased]
-## [1.1.10] - DATE
+## [1.1.11] - DATE
 ### Added
 - 
 
@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix admin auth, hanya system_administrator CRUD admin
 
 -->
+## [1.1.10] - DATE
+### Fixed
+- Get Jadwal Ibadah hari ini menampilkan hanya ibadah yang ada hari ini
+
 ## [1.1.9] - 2025-20-24
 ### Fixed
 - Perbedaan jam server dan admin dashboard pada tampilan jadwal ibadah di dashboard
