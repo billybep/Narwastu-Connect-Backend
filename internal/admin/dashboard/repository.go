@@ -59,18 +59,18 @@ func (r *Repository) GetFinanceTrend() ([]map[string]interface{}, error) {
 	return trend, err
 }
 
-// Get jadwal ibadah minggu ini
+// ✅ Ambil jadwal ibadah hanya untuk HARI INI
 func (r *Repository) GetSchedule() ([]map[string]interface{}, error) {
 	var schedules []map[string]interface{}
 	err := r.db.Raw(`
 		SELECT 
-			TO_CHAR(date_time, 'DD Mon YYYY') AS date,
-			TO_CHAR(date_time, 'HH24:MI') AS time,
+			TO_CHAR((date_time AT TIME ZONE 'Asia/Makassar'), 'DD Mon YYYY') AS date,
+			TO_CHAR((date_time AT TIME ZONE 'Asia/Makassar'), 'HH24:MI') AS time,
 			title AS event,
 			location,
-			description AS leader
+			description
 		FROM events
-		WHERE date_time >= NOW() - INTERVAL '7 DAY'
+		WHERE DATE(date_time AT TIME ZONE 'Asia/Makassar') = CURRENT_DATE
 		ORDER BY date_time ASC
 	`).Scan(&schedules).Error
 	return schedules, err

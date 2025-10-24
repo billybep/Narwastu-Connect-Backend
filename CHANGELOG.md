@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- 
 
 ## [Unreleased]
-## [1.1.9] - DATE
+## [1.1.10] - DATE
 ### Added
 - 
 
@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix admin auth, hanya system_administrator CRUD admin
 
 -->
+## [1.1.9] - 2025-20-24
+### Fixed
+- Perbedaan jam server dan admin dashboard pada tampilan jadwal ibadah di dashboard
+- role error, admin tidak bisa tambah jadwal ibadah
 
 ## [1.1.8] - 2025-10-24
 ### Added

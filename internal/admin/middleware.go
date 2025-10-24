@@ -39,14 +39,14 @@ func AdminJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 func RequireAdminRole(roles ...string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			roleVal := c.Get("admin_role")
-			if roleVal == nil {
-				return c.JSON(http.StatusForbidden, echo.Map{"error": "role not found"})
+			adminVal := c.Get("admin")
+			if adminVal == nil {
+				return c.JSON(http.StatusForbidden, echo.Map{"error": "unauthorized"})
 			}
 
-			role := roleVal.(string)
+			admin := adminVal.(*Admin)
 			for _, allowed := range roles {
-				if role == allowed {
+				if string(admin.Role) == allowed {
 					return next(c)
 				}
 			}
