@@ -63,18 +63,15 @@ func (r *Repository) GetFinanceTrend() ([]map[string]interface{}, error) {
 func (r *Repository) GetSchedule() ([]map[string]interface{}, error) {
 	var schedules []map[string]interface{}
 	err := r.db.Raw(`
-		SELECT 
-			TO_CHAR((date_time AT TIME ZONE 'Asia/Makassar'), 'DD Mon YYYY') AS date,
-			TO_CHAR((date_time AT TIME ZONE 'Asia/Makassar'), 'HH24:MI') AS time,
+		SELECT
+			TO_CHAR((date_time AT TIME ZONE 'UTC'), 'DD Mon YYYY') AS date,
+			TO_CHAR((date_time AT TIME ZONE 'UTC'), 'HH24:MI') AS time,
 			title AS event,
 			location,
 			description
 		FROM events
-		WHERE date_time BETWEEN 
-			((NOW() AT TIME ZONE 'Asia/Makassar')::date AT TIME ZONE 'Asia/Makassar')
-			AND 
-			(((NOW() AT TIME ZONE 'Asia/Makassar')::date + INTERVAL '1 day') AT TIME ZONE 'Asia/Makassar')
-		ORDER BY date_time ASC
+		WHERE (date_time AT TIME ZONE 'UTC')::date = (NOW() AT TIME ZONE 'Asia/Makassar')::date
+		ORDER BY (date_time AT TIME ZONE 'UTC') ASC
 	`).Scan(&schedules).Error
 	return schedules, err
 }
